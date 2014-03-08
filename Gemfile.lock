@@ -27,6 +27,7 @@ GEM
       tzinfo (~> 0.3.37)
     arel (4.0.2)
     atomic (1.1.15)
+    bower-rails (0.7.1)
     builder (3.1.4)
     capybara (2.2.1)
       mime-types (>= 1.16)
@@ -151,6 +152,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  bower-rails
   capybara
   coffee-rails (~> 4.0.0)
   database_cleaner
