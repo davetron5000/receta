@@ -49,7 +49,7 @@ test:
   database: receta_test
   pool: 5
   username: receta
-  password:
+  password: receta
 
 production:
   adapter: postgresql
