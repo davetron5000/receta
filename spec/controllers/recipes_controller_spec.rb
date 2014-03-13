@@ -42,4 +42,30 @@ describe RecipesController do
     end
 
   end
+
+  describe "show" do
+    before do
+      xhr :get, :show, format: :json, id: recipe_id
+    end
+
+    subject(:results) { JSON.parse(response.body) }
+
+    context "when the recipe exists" do
+      let(:recipe) { 
+        Recipe.create!(name: 'Baked Potato w/ Cheese', 
+               instructions: "Nuke for 20 minutes; top with cheese") 
+      }
+      let(:recipe_id) { recipe.id }
+
+      it { expect(response.status).to eq(200) }
+      it { expect(results["id"]).to eq(recipe.id) }
+      it { expect(results["name"]).to eq(recipe.name) }
+      it { expect(results["instructions"]).to eq(recipe.instructions) }
+    end
+
+    context "when the recipe doesn't exit" do
+      let(:recipe_id) { -9999 }
+      it { expect(response.status).to eq(404) }
+    end
+  end
 end
