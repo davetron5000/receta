@@ -1,6 +1,9 @@
 require 'spec_helper.rb'
 
 feature "Creating, editing, and deleting a recipe", js: true do
+  before :each do
+    Recipe.destroy_all
+  end
   scenario "CRUD a recipe" do
     visit '/'
     click_on "New Recipe…"
@@ -30,6 +33,7 @@ feature "Creating, editing, and deleting a recipe", js: true do
     click_on "Roasted Brussel Sprouts"
 
     click_on "Delete"
+    sleep 1
 
     expect(Recipe.find_by_name("Roasted Brussel Sprouts")).to be_nil
 
