@@ -1,9 +1,8 @@
 {
   "name": "angular-flash",
   "description": "Flash messages for Angular Js",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "main": [
-    "dist/angular-flash.min.js",
     "dist/angular-flash.js"
   ],
   "ignore": [
@@ -30,11 +29,11 @@
     "font-awesome": "~3.2.1"
   },
   "homepage": "https://github.com/wmluke/angular-flash",
-  "_release": "0.1.12",
+  "_release": "0.1.13",
   "_resolution": {
     "type": "version",
-    "tag": "0.1.12",
-    "commit": "3f4fc68b5af4b12527c93d11cef3e554196eed0c"
+    "tag": "0.1.13",
+    "commit": "0d8297b62c762d7d461de6f3efa07a2d6904e99c"
   },
   "_source": "git://github.com/wmluke/angular-flash.git",
   "_target": "*",

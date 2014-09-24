@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.2.14
+ * @license AngularJS v1.2.25
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -62,6 +62,8 @@ angular.mock.$Browser = function() {
 
     return listener;
   };
+
+  self.$$checkUrlChange = angular.noop;
 
   self.cookieHash = {};
   self.lastCookieHash = {};
@@ -462,7 +464,7 @@ angular.mock.$IntervalProvider = function() {
           iteration = 0,
           skipApply = (angular.isDefined(invokeApply) && !invokeApply);
 
-      count = (angular.isDefined(count)) ? count : 0,
+      count = (angular.isDefined(count)) ? count : 0;
       promise.then(null, null, fn);
 
       promise.$$intervalId = nextRepeatId;
@@ -505,7 +507,7 @@ angular.mock.$IntervalProvider = function() {
      * @description
      * Cancels a task associated with the `promise`.
      *
-     * @param {number} promise A promise from calling the `$interval` function.
+     * @param {promise} promise A promise from calling the `$interval` function.
      * @returns {boolean} Returns `true` if the task was successfully cancelled.
      */
     $interval.cancel = function(promise) {
@@ -900,7 +902,7 @@ angular.mock.dump = function(object) {
  * When an Angular application needs some data from a server, it calls the $http service, which
  * sends the request to a real server using $httpBackend service. With dependency injection, it is
  * easy to inject $httpBackend mock (which has the same API as $httpBackend) and use it to verify
- * the requests and respond with some testing data without sending a request to real server.
+ * the requests and respond with some testing data without sending a request to a real server.
  *
  * There are two ways to specify what test data should be returned as http responses by the mock
  * backend when the code under test makes http requests:
@@ -967,13 +969,12 @@ angular.mock.dump = function(object) {
  *
  * # Flushing HTTP requests
  *
- * The $httpBackend used in production always responds to requests with responses asynchronously.
- * If we preserved this behavior in unit testing we'd have to create async unit tests, which are
- * hard to write, understand, and maintain. However, the testing mock can't respond
- * synchronously because that would change the execution of the code under test. For this reason the
- * mock $httpBackend has a `flush()` method, which allows the test to explicitly flush pending
- * requests and thus preserve the async api of the backend while allowing the test to execute
- * synchronously.
+ * The $httpBackend used in production always responds to requests asynchronously. If we preserved
+ * this behavior in unit testing, we'd have to create async unit tests, which are hard to write,
+ * to follow and to maintain. But neither can the testing mock respond synchronously; that would
+ * change the execution of the code under test. For this reason, the mock $httpBackend has a
+ * `flush()` method, which allows the test to explicitly flush pending requests. This preserves
+ * the async api of the backend, while allowing the test to execute synchronously.
  *
  *
  * # Unit testing with mock $httpBackend
@@ -1098,12 +1099,12 @@ function createHttpBackendMock($rootScope, $delegate, $browser) {
       responsesPush = angular.bind(responses, responses.push),
       copy = angular.copy;
 
-  function createResponse(status, data, headers) {
+  function createResponse(status, data, headers, statusText) {
     if (angular.isFunction(status)) return status;
 
     return function() {
       return angular.isNumber(status)
-          ? [status, data, headers]
+          ? [status, data, headers, statusText]
           : [200, status, data];
     };
   }
@@ -1128,7 +1129,8 @@ function createHttpBackendMock($rootScope, $delegate, $browser) {
       function handleResponse() {
         var response = wrapped.response(method, url, data, headers);
         xhr.$$respHeaders = response[2];
-        callback(copy(response[0]), copy(response[1]), xhr.getAllResponseHeaders());
+        callback(copy(response[0]), copy(response[1]), xhr.getAllResponseHeaders(),
+                 copy(response[3] || ''));
       }
 
       function handleTimeout() {
@@ -1195,16 +1197,17 @@ function createHttpBackendMock($rootScope, $delegate, $browser) {
    *   request is handled.
    *
    *  - respond –
-   *      `{function([status,] data[, headers])|function(function(method, url, data, headers)}`
-   *    – The respond method takes a set of static data to be returned or a function that can return
-   *    an array containing response status (number), response data (string) and response headers
-   *    (Object).
+   *      `{function([status,] data[, headers, statusText])
+   *      | function(function(method, url, data, headers)}`
+   *    – The respond method takes a set of static data to be returned or a function that can
+   *    return an array containing response status (number), response data (string), response
+   *    headers (Object), and the text for the status (string).
    */
   $httpBackend.when = function(method, url, data, headers) {
     var definition = new MockHttpExpectation(method, url, data, headers),
         chain = {
-          respond: function(status, data, headers) {
-            definition.response = createResponse(status, data, headers);
+          respond: function(status, data, headers, statusText) {
+            definition.response = createResponse(status, data, headers, statusText);
           }
         };
 
@@ -1312,17 +1315,18 @@ function createHttpBackendMock($rootScope, $delegate, $browser) {
    *  request is handled.
    *
    *  - respond –
-   *    `{function([status,] data[, headers])|function(function(method, url, data, headers)}`
-   *    – The respond method takes a set of static data to be returned or a function that can return
-   *    an array containing response status (number), response data (string) and response headers
-   *    (Object).
+   *    `{function([status,] data[, headers, statusText])
+   *    | function(function(method, url, data, headers)}`
+   *    – The respond method takes a set of static data to be returned or a function that can
+   *    return an array containing response status (number), response data (string), response
+   *    headers (Object), and the text for the status (string).
    */
   $httpBackend.expect = function(method, url, data, headers) {
     var expectation = new MockHttpExpectation(method, url, data, headers);
     expectations.push(expectation);
     return {
-      respond: function(status, data, headers) {
-        expectation.response = createResponse(status, data, headers);
+      respond: function (status, data, headers, statusText) {
+        expectation.response = createResponse(status, data, headers, statusText);
       }
     };
   };
@@ -1720,11 +1724,12 @@ angular.mock.$RootElementProvider = function() {
 /**
  * @ngdoc module
  * @name ngMock
+ * @packageName angular-mocks
  * @description
  *
  * # ngMock
  *
- * The `ngMock` module providers support to inject and mock Angular services into unit tests.
+ * The `ngMock` module provides support to inject and mock Angular services into unit tests.
  * In addition, ngMock also extends various core ng services such that they can be
  * inspected and controlled in a synchronous manner within test code.
  *
@@ -1749,6 +1754,7 @@ angular.module('ngMock', ['ng']).provider({
  * @ngdoc module
  * @name ngMockE2E
  * @module ngMockE2E
+ * @packageName angular-mocks
  * @description
  *
  * The `ngMockE2E` is an angular module which contains mocks suitable for end-to-end testing.
@@ -1782,7 +1788,7 @@ angular.module('ngMockE2E', ['ng']).config(['$provide', function($provide) {
  * use the `passThrough` request handler of `when` instead of `respond`.
  *
  * Additionally, we don't want to manually have to flush mocked out requests like we do during unit
- * testing. For this reason the e2e $httpBackend automatically flushes mocked out requests
+ * testing. For this reason the e2e $httpBackend flushes mocked out requests
  * automatically, closely simulating the behavior of the XMLHttpRequest object.
  *
  * To setup the application to run with this http backend, you have to create a module that depends
@@ -1798,7 +1804,9 @@ angular.module('ngMockE2E', ['ng']).config(['$provide', function($provide) {
  *
  *     // adds a new phone to the phones array
  *     $httpBackend.whenPOST('/phones').respond(function(method, url, data) {
- *       phones.push(angular.fromJson(data));
+ *       var phone = angular.fromJson(data);
+ *       phones.push(phone);
+ *       return [200, phone, {}];
  *     });
  *     $httpBackend.whenGET(/^\/templates\//).passThrough();
  *     //...
@@ -1824,13 +1832,14 @@ angular.module('ngMockE2E', ['ng']).config(['$provide', function($provide) {
  *   control how a matched request is handled.
  *
  *  - respond –
- *    `{function([status,] data[, headers])|function(function(method, url, data, headers)}`
+ *    `{function([status,] data[, headers, statusText])
+ *    | function(function(method, url, data, headers)}`
  *    – The respond method takes a set of static data to be returned or a function that can return
- *    an array containing response status (number), response data (string) and response headers
- *    (Object).
- *  - passThrough – `{function()}` – Any request matching a backend definition with `passThrough`
- *    handler, will be pass through to the real backend (an XHR request will be made to the
- *    server.
+ *    an array containing response status (number), response data (string), response headers
+ *    (Object), and the text for the status (string).
+ *  - passThrough – `{function()}` – Any request matching a backend definition with
+ *    `passThrough` handler will be passed through to the real backend (an XHR request will be made
+ *    to the server.)
  */
 
 /**
@@ -1953,12 +1962,18 @@ if(window.jasmine || window.mocha) {
       };
 
 
-  beforeEach(function() {
+  (window.beforeEach || window.setup)(function() {
     currentSpec = this;
   });
 
-  afterEach(function() {
+  (window.afterEach || window.teardown)(function() {
     var injector = currentSpec.$injector;
+
+    angular.forEach(currentSpec.$modules, function(module) {
+      if (module && module.$$hashKey) {
+        module.$$hashKey = undefined;
+      }
+    });
 
     currentSpec.$injector = null;
     currentSpec.$modules = null;
@@ -1990,6 +2005,7 @@ if(window.jasmine || window.mocha) {
    * @description
    *
    * *NOTE*: This function is also published on window for easy access.<br>
+   * *NOTE*: This function is declared ONLY WHEN running tests with jasmine or mocha
    *
    * This function registers a module configuration code. It collects the configuration information
    * which will be used when the injector is created by {@link angular.mock.inject inject}.
@@ -1999,7 +2015,7 @@ if(window.jasmine || window.mocha) {
    * @param {...(string|Function|Object)} fns any number of modules which are represented as string
    *        aliases or as anonymous module initialization functions. The modules are used to
    *        configure the injector. The 'ng' and 'ngMock' modules are automatically loaded. If an
-   *        object literal is passed they will be register as values in the module, the key being
+   *        object literal is passed they will be registered as values in the module, the key being
    *        the module name and the value being what is returned.
    */
   window.module = angular.mock.module = function() {
@@ -2032,6 +2048,7 @@ if(window.jasmine || window.mocha) {
    * @description
    *
    * *NOTE*: This function is also published on window for easy access.<br>
+   * *NOTE*: This function is declared ONLY WHEN running tests with jasmine or mocha
    *
    * The inject function wraps a function into an injectable function. The inject() creates new
    * instance of {@link auto.$injector $injector} per test, which is then used for
