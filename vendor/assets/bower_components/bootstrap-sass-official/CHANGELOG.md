@@ -1,6 +1,22 @@
 # Changelog
 
+## 3.3.1.0
+
+* Variables override template at templates/project/_bootstrap-variables.sass
+* Readme: Bower + Rails configuration
+
+## 3.3.0.1
+
+* Fix loading issue with the ruby gem version
+
+## 3.3.0
+
+* Improve libsass compatibility
+* Support using Bower package with Rails
+
 ## 3.2.0.2
+
+Main bootstrap file is now a partial (_bootstrap.scss), for compatibility with Compass 1+.
 
 Fixed a number of bugs. [Issues closed in v3.2.0.2](https://github.com/twbs/bootstrap-sass/issues?q=is%3Aissue+is%3Aclosed+milestone%3Av3.2.0.2).
 
