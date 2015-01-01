@@ -17,7 +17,7 @@ Please see the appropriate guide for your environment of choice:
 In your Gemfile you need to add the `bootstrap-sass` gem, and ensure that the `sass-rails` gem is present - it is added to new Rails applications by default.
 
 ```ruby
-gem 'bootstrap-sass', '~> 3.2.0'
+gem 'bootstrap-sass', '~> 3.3.1'
 gem 'sass-rails', '>= 3.2'
 ```
 
@@ -33,9 +33,12 @@ gem 'autoprefixer-rails'
 Import Bootstrap styles in `app/assets/stylesheets/application.css.scss`:
 
 ```scss
+// "bootstrap-sprockets" must be imported before "bootstrap" and "bootstrap/variables"
 @import "bootstrap-sprockets";
 @import "bootstrap";
 ```
+
+`bootstrap-sprockets` must be imported before `bootstrap` for the icon fonts to work.
 
 Make sure the file has `.css.scss` extension (or `.css.sass` for Sass syntax). If you have just generated a new Rails app,
 it may come with a `.css` file instead. If this file exists, it will be served instead of Sass, so remove it:
@@ -55,14 +58,37 @@ Require Bootstrap Javascripts in `app/assets/javascripts/application.js`:
 
 #### Bower with Rails
 
-When using [bootstrap-sass Bower package](#c-bower) in Rails, ensure [minimum Sass number precision](#sass-number-precision):
+When using [bootstrap-sass Bower package](#c-bower) instead of the gem in Rails, configure assets in `config/application.rb`:
 
 ```ruby
-# e.g. config/initializers/sass.rb
+# Bower asset paths
+root.join('vendor', 'assets', 'bower_components').to_s.tap do |bower_path|
+  config.sass.load_paths << bower_path
+  config.assets.paths << bower_path
+end
+# Precompile Bootstrap fonts
+config.assets.precompile << %r(bootstrap-sass/assets/fonts/bootstrap/[\w-]+\.(?:eot|svg|ttf|woff)$)
+# Minimum Sass number precision required by bootstrap-sass
 ::Sass::Script::Number.precision = [10, ::Sass::Script::Number.precision].max
 ```
 
-`bootstrap-sprockets` must be imported before `bootstrap` for the icon fonts to work.
+Replace Bootstrap `@import` statements in `application.css.scss` with:
+
+```scss
+$icon-font-path: "bootstrap-sass/assets/fonts/bootstrap/";
+@import "bootstrap-sass/assets/stylesheets/bootstrap-sprockets";
+@import "bootstrap-sass/assets/stylesheets/bootstrap";
+```
+
+Replace Bootstrap `require` directive in `application.js` with:
+
+```js
+//= require bootstrap-sass/assets/javascripts/bootstrap-sprockets
+```
+
+#### Rails 4.x
+
+Please make sure `sprockets-rails` is at least v2.1.4.
 
 #### Rails 3.2.x
 
@@ -111,7 +137,7 @@ $ compass create my-new-project -r bootstrap-sass --using bootstrap
 This will create a new Compass project with the following files in it:
 
 * [styles.sass](/templates/project/styles.sass) - main project Sass file, imports Bootstrap and variables.
-* [_bootstrap-variables.sass](/templates/project/_bootstrap-variables.sass.erb) - all of Bootstrap variables, override them here.
+* [_bootstrap-variables.sass](/templates/project/_bootstrap-variables.sass) - all of Bootstrap variables, override them here.
 
 Some bootstrap-sass mixins may conflict with the Compass ones.
 If this happens, change the import order so that Compass mixins are loaded later.
@@ -159,8 +185,8 @@ See also this [example manifest.js](/test/dummy_node_mincer/manifest.js) for min
 By default all of Bootstrap is imported.
 
 You can also import components explicitly. To start with a full list of modules copy
-[`bootstrap.scss`](assets/stylesheets/bootstrap.scss) file into your assets as `bootstrap-custom.scss`.
-Then comment out components you do not want from `bootstrap-custom`.
+[`_bootstrap.scss`](assets/stylesheets/_bootstrap.scss) file into your assets as `_bootstrap-custom.scss`.
+Then comment out components you do not want from `_bootstrap-custom`.
 In the application Sass file, replace `@import 'bootstrap'` with:
 
 ```scss
@@ -252,6 +278,12 @@ $navbar-default-color: $light-orange;
 
 @import "bootstrap";
 ```
+
+## Version
+
+`bootstrap-sass` version reflects the upstream version, with an additional number for Sass-specific changes.
+
+Always refer to [CHANGELOG.md](/CHANGELOG.md) when upgrading.
 
 ---
 
