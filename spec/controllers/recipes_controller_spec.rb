@@ -63,7 +63,7 @@ describe RecipesController do
       it { expect(results["instructions"]).to eq(recipe.instructions) }
     end
 
-    context "when the recipe doesn't exit" do
+    context "when the recipe doesn't exist" do
       let(:recipe_id) { -9999 }
       it { expect(response.status).to eq(404) }
     end
