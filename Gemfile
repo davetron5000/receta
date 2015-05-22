@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '~> 4'
+gem 'rails', '~> 4.2'
 gem 'pg'
 gem 'sass'
 gem 'sass-rails'
@@ -21,12 +21,12 @@ end
 
 group :test, :development do
   gem "rspec"
-  gem "rspec-rails", "~> 2.0"
-  gem "factory_girl_rails", "~> 4.0"
+  gem "rspec-rails"
+  gem "factory_girl_rails"
   gem "capybara"
   gem "database_cleaner"
   gem "selenium-webdriver"
-  gem 'teaspoon'
+  gem 'teaspoon', "0.7.9"
   gem 'phantomjs'
 end
 
