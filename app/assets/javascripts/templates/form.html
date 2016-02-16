@@ -11,7 +11,7 @@
       Name
     </label>
     <div class="col-md-5">
-      <input type="text" name="name" class="form-control" placeholder="e.g. Baked Alaska" ng-model="recipe.name">
+      <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Baked Alaska" ng-model="recipe.name">
     </div>
   </div>
   <div class="form-group" ng-class="{'has-warning has-feedback':errors.name}">
@@ -21,7 +21,7 @@
       Instructions
     </label>
     <div class="col-md-5">
-      <textarea name="instructions" class="form-control" ng-model='recipe.instructions' placeholder="e.g. Flambé for 20 seconds">
+      <textarea id="instructions" name="instructions" class="form-control" ng-model='recipe.instructions' placeholder="e.g. Flambé for 20 seconds">
       </textarea>
     </div>
   </div>
@@ -33,4 +33,4 @@
       <button class="btn btn-primary" ng-click="save()"> Save </button>
     </div>
   </div>
-</section>
+</form>
