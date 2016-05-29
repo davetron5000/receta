@@ -19,8 +19,6 @@ development:
   encoding: unicode
   database: receta_development
   pool: 5
-  username: receta
-  password: receta
 
   # Connect on a TCP socket. Omitted by default since the client uses a
   # domain socket that doesn't need configuration. Windows does not have
@@ -48,13 +46,9 @@ test:
   encoding: unicode
   database: receta_test
   pool: 5
-  username: receta
-  password: receta
 
 production:
   adapter: postgresql
   encoding: unicode
   database: receta_production
   pool: 5
-  username: receta
-  password:
