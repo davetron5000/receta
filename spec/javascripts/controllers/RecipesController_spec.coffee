@@ -1,3 +1,4 @@
+#= require spec_helper
 describe "RecipesController", ->
   scope        = null
   ctrl         = null
@@ -6,7 +7,7 @@ describe "RecipesController", ->
   resource     = null
   httpBackend  = null
 
-  setupController =(keywords,results)->
+  setupController = (keywords,results)->
     inject(($location, $routeParams, $rootScope, $resource, $httpBackend, $controller)->
       scope       = $rootScope.$new()
       location    = $location
